@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>帽子工厂 · 娄祥云</title>
+<style>
+  [hidden]{display:none!important}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0;min-height:100vh;
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+    background:radial-gradient(circle at 50% -10%, #2c3240 0%, #15181e 60%, #0d0f13 100%);
+    color:#f0e6d2;
+    display:flex;justify-content:center;
+    user-select:none;
+  }
+
+  /* ============================================================
+     一、封面页
+     ============================================================ */
+  .intro{
+    position:fixed;inset:0;z-index:50;
+    display:flex;align-items:center;justify-content:center;
+    padding:60px 20px 40px;
+    background:radial-gradient(circle at 50% 20%, #3a4256 0%, #1b1f27 55%, #0d0f13 100%);
+    transition:opacity .42s ease, transform .42s ease;
+  }
+  .intro.out{opacity:0;transform:scale(1.08);pointer-events:none}
+
+  .intro-inner{
+    display:flex;flex-direction:column;align-items:center;
+    gap:14px;text-align:center;
+  }
+  .intro-kicker{
+    margin:0;font-size:12px;letter-spacing:.42em;text-indent:.42em;color:#8d96a6;
+  }
+  .intro-name{
+    margin:0;font-size:clamp(30px,7vw,46px);font-weight:900;letter-spacing:.18em;
+    text-indent:.18em;color:#f5d98b;
+    text-shadow:0 0 28px rgba(245,217,139,.45), 0 3px 0 #6b4d10;
+  }
+
+  .intro-photo-wrap{
+    position:relative;
+    width:min(70vw, 320px);
+    aspect-ratio:3/4;
+    margin-top:34px;
+  }
+  .intro-photo{
+    width:100%;height:100%;object-fit:cover;
+    border-radius:20px;
+    background:#232833;
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 0 0 8px rgba(245,217,139,.07), 0 30px 60px -20px rgba(0,0,0,.95);
+    display:block;
+    color:#8d96a6;font-size:14px;
+  }
+
+  /* 头顶按钮 */
+  .head-btn{
+    position:absolute;left:50%;top:0;z-index:2;
+    transform:translate(-50%,-55%);
+    padding:12px 26px;
+    border-radius:999px;border:2px solid #fff3cd;
+    background:linear-gradient(#f7e3a4,#d9b356);
+    color:#2b1f08;
+    font-family:inherit;font-size:17px;font-weight:900;letter-spacing:.14em;
+    cursor:pointer;white-space:nowrap;
+    box-shadow:
+      0 0 0 7px rgba(245,217,139,.15),
+      0 10px 26px -6px rgba(0,0,0,.9),
+      0 5px 0 #8a6b1e;
+    animation:btnFloat 2.4s ease-in-out infinite;
+  }
+  @keyframes btnFloat{
+    0%,100%{transform:translate(-50%,-55%)}
+    50%    {transform:translate(-50%,-74%)}
+  }
+  .head-btn:hover{box-shadow:0 0 0 11px rgba(245,217,139,.22),0 12px 30px -6px rgba(0,0,0,.9),0 5px 0 #8a6b1e}
+  .head-btn:active{animation:none;transform:translate(-50%,-52%) scale(.95)}
+
+  .intro-tip{
+    margin:2px 0 0;font-size:13px;color:#9aa3b2;letter-spacing:.14em;
+    animation:tipBlink 2.6s ease-in-out infinite;
+  }
+  @keyframes tipBlink{0%,100%{opacity:.55}50%{opacity:1}}
+
+  /* ============================================================
+     二、主页面
+     ============================================================ */
+  .wrap{width:100%;max-width:1020px;padding:20px 18px 26px;display:flex;flex-direction:column;gap:14px}
+
+  header{text-align:center}
+  h1{margin:0;font-size:28px;letter-spacing:.35em;text-indent:.35em;color:#f5d98b;
+     text-shadow:0 0 18px rgba(245,217,139,.35),0 2px 0 #6b4d10}
+  .sub{margin:6px 0 0;font-size:12.5px;color:#8d96a6;letter-spacing:.2em}
+
+  main{display:flex;gap:16px;align-items:stretch}
+
+  /* ===== 舞台 ===== */
+  .stage{
+    position:relative;flex:1 1 auto;
+    height:clamp(440px,68vh,640px);
+    border-radius:22px;
+    background:radial-gradient(circle at 50% 26%, #414b60 0%, #262c38 46%, #161a21 100%);
+    border:1px solid rgba(255,255,255,.09);
+    box-shadow:inset 0 0 60px rgba(0,0,0,.55),0 18px 40px -18px rgba(0,0,0,.9);
+    overflow:hidden;cursor:pointer;
+    transition:transform .12s ease;
+  }
+  .stage:active{transform:scale(.996)}
+
+  .scene{position:absolute;inset:0;transform-origin:50% 100%;
+         transition:transform .35s cubic-bezier(.4,0,.2,1)}
+
+  .photolayer{position:absolute;inset:0;z-index:1}
+  #photo{width:100%;height:100%;object-fit:contain;display:block}
+
+  .imgerr{
+    position:absolute;inset:0;display:none;
+    align-items:center;justify-content:center;text-align:center;
+    font-size:14px;line-height:2;color:#8d96a6;padding:30px;
+  }
+  .imgerr span{font-size:12px;color:#6b7484}
+
+  /* ============================================================
+     巨大印章字：每顶帽子名称，角度和大小各不相同
+     ============================================================ */
+  .stamp{
+    --rot: -14deg;
+    position:absolute;left:50%;top:50%;z-index:2;
+    pointer-events:none;white-space:nowrap;
+    font-size:clamp(90px,22vw,220px);
+    font-weight:900;letter-spacing:.08em;line-height:1;
+    color:rgba(255,112,72,.13);
+    -webkit-text-stroke:3px rgba(255,116,76,.70);
+    text-shadow:
+      0 0 46px rgba(255,90,60,.42),
+      0 0 2px rgba(255,150,120,.55);
+    transform:translate(-50%,-50%) rotate(var(--rot));
+    transform-origin:center;
+    opacity:.58;
+  }
+
+  .stamp.slam{animation:stampSlam .92s cubic-bezier(.22,1,.36,1) both}
+  @keyframes stampSlam{
+    0%  {transform:translate(-50%,-50%) rotate(var(--rot)) scale(3.6);
+         opacity:0;filter:blur(16px)}
+    45% {opacity:1;filter:blur(0)}
+    66% {transform:translate(-50%,-50%) rotate(var(--rot)) scale(.93)}
+    82% {transform:translate(-50%,-50%) rotate(var(--rot)) scale(1.04)}
+    100%{transform:translate(-50%,-50%) rotate(var(--rot)) scale(1);opacity:.58}
+  }
+
+  /* ===== 帽子层 ===== */
+  .hats{position:absolute;inset:0;z-index:3;pointer-events:none}
+  .hat{position:absolute;left:50%;will-change:bottom}
+  .hat svg{display:block;width:100%;height:auto}
+  .hat-inner{animation:drop .42s cubic-bezier(.34,1.56,.64,1) both;transform-origin:50% 100%}
+  @keyframes drop{
+    from{transform:translateY(-80px) scale(.5);opacity:0}
+    60%{opacity:1}
+    to{transform:translateY(0) scale(1);opacity:1}
+  }
+
+  .hint{position:absolute;left:0;right:0;bottom:10px;z-index:4;text-align:center;font-size:12px;
+        color:rgba(255,255,255,.32);pointer-events:none;letter-spacing:.1em}
+
+  /* ===== 侧栏 ===== */
+  .panel{width:288px;flex:0 0 288px;display:flex;flex-direction:column;gap:10px}
+  .card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);
+        border-radius:16px;padding:12px 14px}
+
+  .profile{flex:1 1 auto;overflow:auto;min-height:130px}
+  .pname{font-size:19px;font-weight:800;color:#f5d98b;letter-spacing:.06em;
+         display:flex;align-items:center;gap:8px}
+  .badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px;
+         background:rgba(245,217,139,.16);color:#f5d98b;letter-spacing:.1em}
+  .bio{margin:9px 0 0;font-size:14.5px;line-height:1.95;color:#c9d0dc}
+  .bio b{color:#ffd76e;font-weight:800}
+  .bio b.fresh{display:inline-block;animation:freshIn .45s cubic-bezier(.3,1.6,.5,1) both}
+  @keyframes freshIn{from{transform:scale(.4) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+
+  .counter{display:flex;align-items:baseline;gap:8px}
+  .num{font-size:32px;font-weight:800;color:#f5d98b;line-height:1;
+       text-shadow:0 0 20px rgba(245,217,139,.4)}
+  .unit{font-size:12.5px;color:#9aa3b2;letter-spacing:.12em}
+
+  .listcard{flex:0 0 auto}
+  .list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;
+        max-height:104px;overflow:auto}
+  .list:empty::after{content:"还没有帽子";color:#5d6675;font-size:12.5px}
+  .chip{background:#fdf3dd;color:#3a2a1a;border-radius:999px;padding:4px 11px;
+        font-size:13px;font-weight:700;box-shadow:0 2px 0 rgba(0,0,0,.35);
+        animation:chipIn .3s cubic-bezier(.3,1.7,.5,1) both}
+  @keyframes chipIn{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+
+  .btns{display:flex;flex-direction:column;gap:8px}
+  button{font-family:inherit;font-size:14.5px;font-weight:700;padding:11px 14px;
+    border-radius:13px;border:0;cursor:pointer;
+    background:linear-gradient(#f5d98b,#d9b356);color:#2b1f08;
+    box-shadow:0 4px 0 #8a6b1e,0 10px 20px -8px rgba(0,0,0,.9);
+    transition:transform .08s,box-shadow .08s;letter-spacing:.08em}
+  button:active{transform:translateY(3px);box-shadow:0 1px 0 #8a6b1e}
+  button.ghost{background:rgba(255,255,255,.07);color:#cfd6e2;
+    box-shadow:0 4px 0 rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.13)}
+  button.ghost:active{box-shadow:0 1px 0 rgba(0,0,0,.35)}
+  button:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:0 4px 0 #444}
+
+  .sliders{display:flex;flex-direction:column;gap:7px;font-size:12px;color:#8d96a6;
+           padding:10px 14px;background:rgba(255,255,255,.04);border-radius:14px;
+           border:1px solid rgba(255,255,255,.07)}
+  .slider-row{display:flex;align-items:center;gap:9px}
+  .slider-row label{flex:0 0 60px}
+  input[type=range]{flex:1;accent-color:#f5d98b;height:18px}
+
+  .shake{animation:shake .4s ease}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-7px)}
+    40%{transform:translateX(7px)}
+    60%{transform:translateX(-4px)}
+    80%{transform:translateX(4px)}
+  }
+
+  @media(max-width:820px){
+    main{flex-direction:column}
+    .panel{width:100%;flex:0 0 auto}
+    .btns{flex-direction:row;flex-wrap:wrap}
+    .btns button{flex:1 1 40%}
+    .list{max-height:74px}
+    .stage{height:clamp(360px,54vh,520px)}
+    h1{font-size:23px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     封面：娄祥云照片 + 头顶按钮
+     ============================================================ -->
+<div class="intro" id="intro">
+  <div class="intro-inner">
+    <p class="intro-kicker">帽 子 工 厂</p>
+    <h2 class="intro-name">娄祥云</h2>
+
+    <div class="intro-photo-wrap">
+      <!-- ★ 改图片只改这里的 src ★ -->
+      <img class="intro-photo" src="/louxiangyun/photo.jpg" alt="娄祥云的照片（请把 photo.jpg 放在同目录）">
+      <button class="head-btn" id="enterBtn">🎩 扣帽子</button>
+    </div>
+
+    <p class="intro-tip">点他头顶的按钮，进厂扣帽子</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     主页面
+     ============================================================ -->
+<div class="wrap" id="app" hidden>
+  <header>
+    <h1>帽子工厂</h1>
+    <p class="sub">点击人物 · 一层一层扣帽子</p>
+  </header>
+
+  <main>
+    <!-- 舞台 -->
+    <div class="stage" id="stage">
+      <div class="scene" id="scene">
+        <div class="photolayer">
+          <!-- ★ 这里也同步改 src ★ -->
+          <img id="photo" src="/louxiangyun/photo.jpg" alt="娄祥云">
+          <div class="imgerr" id="imgerr">
+            图片 photo.jpg 没找到<br>
+            <span>请把照片放在 index.html 同一目录下</span>
+          </div>
+        </div>
+
+        <!-- 巨大印章字：每次显示当前帽子的名称 -->
+        <div class="stamp" id="stamp">扣帽子</div>
+
+        <div class="hats" id="hats"></div>
+      </div>
+      <div class="hint">👆 点击人物，一层一层扣帽子</div>
+    </div>
+
+    <!-- 侧栏 -->
+    <aside class="panel">
+      <div class="card profile">
+        <div class="pname">娄祥云 <span class="badge">人物简介</span></div>
+        <p class="bio" id="bio">这是娄祥云。</p>
+      </div>
+
+      <div class="card counter">
+        <span class="num" id="num">0</span>
+        <span class="unit">顶帽子</span>
+      </div>
+
+      <div class="card listcard">
+        <ul class="list" id="list"></ul>
+      </div>
+
+      <div class="btns">
+        <button id="btn-hat">再扣一顶</button>
+        <button id="btn-reset" class="ghost">平反</button>
+        <button id="btn-back" class="ghost">← 回到封面</button>
+      </div>
+
+      <div class="sliders">
+        <div class="slider-row">
+          <label for="posRange">帽子高低</label>
+          <input type="range" id="posRange" min="0" max="35" value="35">
+        </div>
+        <div class="slider-row">
+          <label for="offRange">帽子左右</label>
+          <input type="range" id="offRange" min="-15" max="15" value="-8">
+        </div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============================================================
+     帽子库：30 顶
+     rot  = 印章倾斜角度（每顶不同，正负交错）
+     size = 印章字号系数（每顶不同，形成大小变化）
+     ============================================================ */
+  const HATS = [
+    /* 01 */ { name: "特务",     rot: -14, size: 1.00, shape: `
+      <ellipse cx="0" cy="0" rx="92" ry="13" fill="#111"/>
+      <path d="M-62,-4 C-66,-58 -40,-66 0,-66 C40,-66 66,-58 62,-4 Z" fill="#232323"/>
+      <rect x="-63" y="-28" width="126" height="13" rx="3" fill="#8b1414"/>
+    `},
+    /* 02 */ { name: "大军阀",   rot: 11,  size: 1.08, shape: `
+      <ellipse cx="0" cy="3" rx="86" ry="12" fill="#191919"/>
+      <path d="M-68,0 C-70,-52 -42,-64 0,-64 C42,-64 70,-52 68,0 Z" fill="#63703f"/>
+      <path d="M-68,0 L68,0 L64,-15 L-64,-15 Z" fill="#4b5730"/>
+      <circle cx="0" cy="-36" r="13" fill="#b71c1c"/>
+      <path d="M0,-47 L3.5,-38 L13,-38 L5.5,-32 L8.5,-23 L0,-28.5 L-8.5,-23 L-5.5,-32 L-13,-38 L-3.5,-38 Z" fill="#f2c53d"/>
+    `},
+    /* 03 */ { name: "走资派",   rot: -7,  size: 0.92, shape: `
+      <ellipse cx="0" cy="0" rx="90" ry="12" fill="#0f0f0f"/>
+      <rect x="-50" y="-104" width="100" height="104" rx="5" fill="#1c1c1c"/>
+      <rect x="-50" y="-30" width="100" height="14" fill="#7a0e0e"/>
+      <ellipse cx="0" cy="-104" rx="50" ry="8" fill="#2a2a2a"/>
+    `},
+    /* 04 */ { name: "叛徒",     rot: 17,  size: 0.98, shape: `
+      <ellipse cx="0" cy="0" rx="86" ry="12" fill="#12180f"/>
+      <path d="M-56,-4 C-56,-62 56,-62 56,-4 Z" fill="#2b3a26"/>
+      <rect x="-56" y="-26" width="112" height="12" fill="#1b2418"/>
+    `},
+    /* 05 */ { name: "反动派",   rot: -19, size: 1.12, shape: `
+      <ellipse cx="0" cy="-14" rx="84" ry="30" fill="#6d1b1b"/>
+      <ellipse cx="0" cy="-8" rx="84" ry="14" fill="#4d1212"/>
+      <circle cx="0" cy="-44" r="7" fill="#c9a227"/>
+    `},
+    /* 06 */ { name: "反动权威", rot: 8,   size: 0.90, shape: `
+      <rect x="-44" y="-46" width="88" height="36" rx="4" fill="#2a2a2a"/>
+      <path d="M-98,-54 L0,-80 L98,-54 L0,-28 Z" fill="#141414"/>
+      <path d="M0,-78 L0,-104" stroke="#c9a227" stroke-width="3"/>
+      <circle cx="0" cy="-106" r="6" fill="#c9a227"/>
+    `},
+    /* 07 */ { name: "牛鬼蛇神", rot: -11, size: 1.05, shape: `
+      <ellipse cx="0" cy="0" rx="84" ry="12" fill="#3a2a18"/>
+      <path d="M-64,-2 L0,-128 L64,-2 Z" fill="#5a4126"/>
+      <path d="M-64,-2 L0,-128 L0,-2 Z" fill="#6f5233"/>
+      <circle cx="0" cy="-130" r="7" fill="#c9a227"/>
+    `},
+    /* 08 */ { name: "工贼",     rot: 21,  size: 0.95, shape: `
+      <path d="M-82,-4 C-82,-76 82,-76 82,-4 Z" fill="#c9a227"/>
+      <rect x="-7" y="-80" width="14" height="76" rx="6" fill="#a8861a"/>
+      <ellipse cx="0" cy="-4" rx="82" ry="11" fill="#e0b93a"/>
+    `},
+    /* 09 */ { name: "野心家",   rot: -16, size: 0.90, shape: `
+      <ellipse cx="-80" cy="-26" rx="18" ry="6" fill="#141414"/>
+      <ellipse cx="80" cy="-26" rx="18" ry="6" fill="#141414"/>
+      <ellipse cx="0" cy="0" rx="80" ry="11" fill="#0d0d0d"/>
+      <path d="M-58,-2 L-58,-44 Q0,-62 58,-44 L58,-2 Z" fill="#161616"/>
+      <rect x="-58" y="-32" width="116" height="12" fill="#c9a227"/>
+    `},
+    /* 10 */ { name: "大恶霸",   rot: 6,   size: 1.10, shape: `
+      <ellipse cx="0" cy="0" rx="99" ry="14" fill="#4a3320"/>
+      <path d="M-58,0 C-62,-58 -40,-72 0,-72 C40,-72 62,-58 58,0 Z" fill="#6b4a2f"/>
+      <rect x="-58" y="-24" width="116" height="12" fill="#2a1c10"/>
+    `},
+    /* 11 */ { name: "卖国贼",   rot: -21, size: 0.96, shape: `
+      <ellipse cx="0" cy="0" rx="80" ry="12" fill="#1a1a1a"/>
+      <path d="M-72,-2 C-72,-62 72,-62 72,-2 Z" fill="#2f2f2f"/>
+      <circle cx="0" cy="-64" r="9" fill="#b71c1c"/>
+    `},
+    /* 12 */ { name: "黑帮",     rot: 14,  size: 1.03, shape: `
+      <path d="M-80,-4 C-80,-84 80,-84 80,-4 Z" fill="#3f4a24"/>
+      <ellipse cx="0" cy="-4" rx="80" ry="11" fill="#4d5a2c"/>
+      <rect x="-86" y="-8" width="172" height="11" rx="5" fill="#2f3819"/>
+    `},
+    /* 13 */ { name: "汉奸",     rot: -9,  size: 1.08, shape: `
+      <ellipse cx="0" cy="0" rx="96" ry="12" fill="#7a6a3a"/>
+      <path d="M-64,0 C-70,-46 -40,-56 0,-56 C40,-56 70,-46 64,0 Z" fill="#8f7d46"/>
+      <path d="M-64,0 L64,0 L60,-12 L-60,-12 Z" fill="#6d5c2f"/>
+    `},
+    /* 14 */ { name: "保皇派",   rot: 19,  size: 0.94, shape: `
+      <ellipse cx="0" cy="0" rx="80" ry="11" fill="#111"/>
+      <path d="M-70,-2 C-70,-58 70,-58 70,-2 Z" fill="#262626"/>
+      <circle cx="0" cy="-60" r="11" fill="#c9a227"/>
+      <path d="M0,-71 L0,-88" stroke="#c9a227" stroke-width="4"/>
+      <circle cx="0" cy="-92" r="6" fill="#b71c1c"/>
+    `},
+    /* 15 */ { name: "投机分子", rot: -17, size: 0.92, shape: `
+      <ellipse cx="0" cy="0" rx="84" ry="12" fill="#20242b"/>
+      <path d="M-52,-2 L-20,-96 L20,-96 L52,-2 Z" fill="#333a44"/>
+      <rect x="-24" y="-104" width="48" height="12" rx="4" fill="#4a5563"/>
+    `},
+    /* 16 */ { name: "阶级敌人", rot: 10,  size: 1.02, shape: `
+      <ellipse cx="0" cy="2" rx="88" ry="12" fill="#1a1a1a"/>
+      <path d="M-64,0 C-66,-48 -40,-58 0,-58 C40,-58 66,-48 64,0 Z" fill="#4a4f38"/>
+      <path d="M-64,0 L64,0 L60,-12 L-60,-12 Z" fill="#3a3f2c"/>
+      <circle cx="0" cy="-32" r="10" fill="#b71c1c"/>
+    `},
+    /* 17 */ { name: "变色龙",   rot: -13, size: 1.10, shape: `
+      <ellipse cx="0" cy="0" rx="84" ry="12" fill="#222"/>
+      <path d="M-60,-2 L-60,-52 Q0,-70 60,-52 L60,-2 Z" fill="#2e8b57"/>
+      <path d="M-60,-2 L0,-70 L60,-2 Z" fill="#c0392b" opacity=".78"/>
+    `},
+    /* 18 */ { name: "复辟狂",   rot: 16,  size: 0.90, shape: `
+      <ellipse cx="0" cy="0" rx="86" ry="12" fill="#0f0f0f"/>
+      <path d="M-56,-4 C-56,-62 56,-62 56,-4 Z" fill="#2b2b2b"/>
+      <rect x="-56" y="-26" width="112" height="12" fill="#a8861a"/>
+    `},
+    /* 19 */ { name: "走狗",     rot: -20, size: 1.16, shape: `
+      <ellipse cx="0" cy="0" rx="82" ry="12" fill="#1a1a1a"/>
+      <path d="M-56,-2 L-56,-46 Q0,-60 56,-46 L56,-2 Z" fill="#333"/>
+      <path d="M-46,-46 L-58,-86 L-24,-56 Z" fill="#3d3d3d"/>
+      <path d="M46,-46 L58,-86 L24,-56 Z" fill="#3d3d3d"/>
+    `},
+    /* 20 */ { name: "两面派",   rot: 7,   size: 0.95, shape: `
+      <ellipse cx="0" cy="0" rx="84" ry="12" fill="#151515"/>
+      <path d="M-58,-2 L-58,-50 Q0,-66 58,-50 L58,-2 Z" fill="#2b3a26"/>
+      <path d="M0,-2 L0,-60 L58,-50 L58,-2 Z" fill="#5a1c1c"/>
+    `},
+    /* 21 */ { name: "老右派",   rot: -6,  size: 1.00, shape: `
+      <ellipse cx="0" cy="-16" rx="86" ry="28" fill="#4f3b1f" transform="rotate(-8)"/>
+      <ellipse cx="0" cy="-8" rx="80" ry="13" fill="#3a2a14"/>
+    `},
+    /* 22 */ { name: "黑后台",   rot: 13,  size: 1.06, shape: `
+      <ellipse cx="0" cy="0" rx="100" ry="13" fill="#0d0d0d"/>
+      <path d="M-62,0 C-66,-56 -42,-68 0,-68 C42,-68 66,-56 62,0 Z" fill="#1f1f1f"/>
+      <rect x="-62" y="-24" width="124" height="11" fill="#3d3d3d"/>
+    `},
+    /* 23 */ { name: "教条主义", rot: -5,  size: 1.02, shape: `
+      <ellipse cx="0" cy="0" rx="96" ry="13" fill="#2b1d10"/>
+      <rect x="-76" y="-32" width="152" height="32" rx="4" fill="#8b6b3e"/>
+      <rect x="-72" y="-60" width="144" height="28" rx="4" fill="#a17e4a"/>
+      <rect x="-68" y="-86" width="136" height="26" rx="4" fill="#b8925a"/>
+      <rect x="-76" y="-14" width="152" height="6" fill="#5f4728"/>
+      <path d="M-76,-32 L76,-32" stroke="#d9bc85" stroke-width="2"/>
+      <path d="M-72,-60 L72,-60" stroke="#d9bc85" stroke-width="2"/>
+    `},
+    /* 24 */ { name: "经验主义", rot: 18,  size: 0.92, shape: `
+      <ellipse cx="0" cy="0" rx="94" ry="12" fill="#3a2a1a"/>
+      <path d="M-64,-4 C-66,-54 -38,-66 0,-66 C38,-66 66,-54 64,-4 Z" fill="#6b5030"/>
+      <path d="M-64,-14 C-30,-20 30,-20 64,-14 L64,-4 L-64,-4 Z" fill="#543d24"/>
+      <path d="M-64,-4 L-98,4 L-96,14 L-58,4 Z" fill="#3a2a1a"/>
+      <circle cx="0" cy="-68" r="6" fill="#8a6b44"/>
+    `},
+    /* 25 */ { name: "形式主义", rot: -18, size: 1.05, shape: `
+      <ellipse cx="0" cy="0" rx="88" ry="12" fill="#1a1a1a"/>
+      <path d="M-54,-2 L-40,-96 L40,-96 L54,-2 Z" fill="#2c2c2c"/>
+      <rect x="-56" y="-28" width="112" height="10" fill="#c9a227"/>
+      <circle cx="0" cy="-100" r="10" fill="#c0392b"/>
+      <path d="M0,-110 L0,-126" stroke="#c9a227" stroke-width="4"/>
+      <circle cx="0" cy="-130" r="5" fill="#f2c53d"/>
+    `},
+    /* 26 */ { name: "官僚主义", rot: 9,   size: 0.96, shape: `
+      <ellipse cx="0" cy="0" rx="88" ry="12" fill="#141414"/>
+      <path d="M-62,-2 C-64,-52 -40,-62 0,-62 C40,-62 64,-52 62,-2 Z" fill="#2a2a2a"/>
+      <rect x="-62" y="-28" width="124" height="12" fill="#7a0e0e"/>
+      <circle cx="0" cy="-66" r="9" fill="#c9a227"/>
+      <circle cx="0" cy="-66" r="4" fill="#fff3cd"/>
+      <ellipse cx="-92" cy="-30" rx="24" ry="7" fill="#1a1a1a"/>
+      <ellipse cx="92" cy="-30" rx="24" ry="7" fill="#1a1a1a"/>
+    `},
+    /* 27 */ { name: "宗派主义", rot: -22, size: 1.00, shape: `
+      <ellipse cx="0" cy="0" rx="100" ry="13" fill="#1a1a1a"/>
+      <path d="M-54,-2 L0,-96 L54,-2 Z" fill="#4a3f2a"/>
+      <path d="M-54,-2 L0,-96 L0,-2 Z" fill="#5c4e34"/>
+      <circle cx="0" cy="-100" r="8" fill="#c9a227"/>
+      <path d="M-92,-4 L-54,-2" stroke="#3a3122" stroke-width="5" stroke-linecap="round"/>
+      <path d="M92,-4 L54,-2" stroke="#3a3122" stroke-width="5" stroke-linecap="round"/>
+    `},
+    /* 28 */ { name: "自由主义", rot: 4,   size: 1.12, shape: `
+      <ellipse cx="0" cy="0" rx="86" ry="12" fill="#3a3a3a"/>
+      <path d="M-58,-2 C-72,-42 -50,-58 0,-54 C50,-58 72,-42 58,-2 Z" fill="#6b6b6b"/>
+      <path d="M-40,-30 C-24,-46 24,-46 40,-30 C24,-38 -24,-38 -40,-30 Z" fill="#8a8a8a"/>
+      <circle cx="0" cy="-56" r="9" fill="#7d7d7d"/>
+      <path d="M-58,-2 L58,-2" stroke="#4d4d4d" stroke-width="4"/>
+    `},
+    /* 29 */ { name: "主观主义", rot: 20,  size: 0.94, shape: `
+      <ellipse cx="0" cy="0" rx="90" ry="12" fill="#2b1d10"/>
+      <path d="M-74,-2 C-74,-60 74,-60 74,-2 Z" fill="#8b3a3a"/>
+      <ellipse cx="0" cy="-36" rx="74" ry="20" fill="#a84a4a" opacity=".55"/>
+      <circle cx="0" cy="-62" r="10" fill="#f2c53d"/>
+      <circle cx="-26" cy="-30" r="5" fill="#f7e3a4" opacity=".6"/>
+      <circle cx="22" cy="-42" r="4" fill="#f7e3a4" opacity=".6"/>
+    `},
+    /* 30 */ { name: "机会主义", rot: -12, size: 1.02, shape: `
+      <ellipse cx="0" cy="0" rx="96" ry="13" fill="#2a1c10"/>
+      <path d="M-56,-2 C-58,-56 -30,-68 0,-68 C30,-68 58,-56 56,-2 Z" fill="#7a5a3a"/>
+      <path d="M-56,-2 L56,-2 L50,-16 L-50,-16 Z" fill="#5a3f28"/>
+      <rect x="-42" y="-26" width="84" height="10" fill="#c9a227"/>
+      <path d="M0,-68 L0,-80" stroke="#c9a227" stroke-width="3"/>
+    `}
+  ];
+
+  /* ============================================================ */
+  const intro     = document.getElementById("intro");
+  const app       = document.getElementById("app");
+  const enterBtn  = document.getElementById("enterBtn");
+  const backBtn   = document.getElementById("btn-back");
+
+  const stage     = document.getElementById("stage");
+  const scene     = document.getElementById("scene");
+  const hatsLayer = document.getElementById("hats");
+  const stamp     = document.getElementById("stamp");
+  const photo     = document.getElementById("photo");
+  const imgerr    = document.getElementById("imgerr");
+  const listEl    = document.getElementById("list");
+  const numEl     = document.getElementById("num");
+  const bioEl     = document.getElementById("bio");
+  const btnHat    = document.getElementById("btn-hat");
+  const btnReset  = document.getElementById("btn-reset");
+  const posRange  = document.getElementById("posRange");
+  const offRange  = document.getElementById("offRange");
+
+  const state = { hats: [], hatW: 220, step: 44, baseBottom: 300, offPx: 0 };
+
+  /* ---------- 图片加载失败提示 ---------- */
+  photo.addEventListener("error", function () {
+    photo.style.display = "none";
+    imgerr.style.display = "flex";
+  });
+  photo.addEventListener("load", function () {
+    imgerr.style.display = "none";
+    photo.style.display = "";
+    layout();
+  });
+
+  /* ---------- 计算图片实际渲染矩形 ---------- */
+  function photoRect() {
+    const cw = scene.clientWidth, ch = scene.clientHeight;
+    if (photo.style.display === "none" || !photo.naturalWidth) {
+      return { x: 0, y: 0, w: cw, h: ch };
+    }
+    const k = Math.min(cw / photo.naturalWidth, ch / photo.naturalHeight);
+    const w = photo.naturalWidth * k;
+    const h = photo.naturalHeight * k;
+    return { x: (cw - w) / 2, y: (ch - h) / 2, w: w, h: h };
+  }
+
+  /* ---------- 排布帽子 + 整体缩放 ---------- */
+  function layout() {
+    const cw = scene.clientWidth, ch = scene.clientHeight;
+    if (!cw || !ch) return;
+
+    const r = photoRect();
+    state.hatW = Math.round(Math.max(120, Math.min(300, r.w * 0.92)));
+
+    // 帽子越多，层间距越小，避免整体缩得太狠
+    const n = state.hats.length;
+    const factor = n <= 6 ? 0.20 : (n <= 12 ? 0.17 : (n <= 20 ? 0.14 : 0.11));
+    state.step = Math.round(state.hatW * factor);
+
+    const ratio = Number(posRange.value) / 100;
+    state.baseBottom = ch - (r.y + r.h * ratio);
+    state.offPx = cw * (Number(offRange.value) / 100);
+
+    state.hats.forEach(function (h, i) {
+      h.el.style.width      = state.hatW + "px";
+      h.el.style.marginLeft = (-state.hatW / 2 + state.offPx) + "px";
+      h.el.style.bottom     = (state.baseBottom + i * state.step) + "px";
+    });
+
+    const topNeed = n ? state.baseBottom + (n - 1) * state.step + state.hatW : ch;
+    const s = Math.min(1, (ch - 4) / topNeed);
+    scene.style.transform = "scale(" + s.toFixed(4) + ")";
+  }
+
+  /* ============================================================
+     印章：文字 + 独立角度 + 独立大小
+     ============================================================ */
+  function setStampText(text, rot, size) {
+    stamp.textContent = text;
+    stamp.style.setProperty("--rot", rot + "deg");
+
+    const len = text.length;
+    let base;
+    if (len <= 2)       { base = "clamp(92px, 22vw, 220px)";  stamp.style.letterSpacing = ".08em"; }
+    else if (len === 3) { base = "clamp(74px, 17.5vw, 178px)"; stamp.style.letterSpacing = ".06em"; }
+    else if (len === 4) { base = "clamp(56px, 13.5vw, 138px)"; stamp.style.letterSpacing = ".04em"; }
+    else                { base = "clamp(44px, 11vw, 112px)";   stamp.style.letterSpacing = ".02em"; }
+
+    stamp.style.fontSize = "calc(" + base + " * " + size + ")";
+  }
+
+  function slamStamp() {
+    stamp.classList.remove("slam");
+    void stamp.offsetWidth;      // 强制重排，重启动画
+    stamp.classList.add("slam");
+  }
+
+  stamp.addEventListener("animationend", function (e) {
+    if (e.animationName === "stampSlam") stamp.classList.remove("slam");
+  });
+
+  /* ---------- 扣一顶 ---------- */
+  function addHat() {
+    if (state.hats.length >= HATS.length) { shake(); return; }
+
+    const hat = HATS[state.hats.length];
+    const el = document.createElement("div");
+    el.className = "hat";
+    el.innerHTML =
+      '<div class="hat-inner">' +
+        '<svg viewBox="0 0 200 200">' +
+          '<g transform="translate(100,187)">' + hat.shape + "</g>" +
+        "</svg>" +
+      "</div>";
+    hatsLayer.appendChild(el);
+
+    state.hats.push({ name: hat.name, el: el });
+    layout();
+    updateUI(true);
+
+    /* ★ 印章：这顶帽子的名字 + 它专属的角度和大小 ★ */
+    setStampText(hat.name, hat.rot, hat.size);
+    slamStamp();
+  }
+
+  /* ---------- 侧栏更新 ---------- */
+  function updateUI(fresh) {
+    const names = state.hats.map(function (h) { return h.name; });
+    numEl.textContent = names.length;
+
+    var html = "这是娄祥云";
+    if (names.length) {
+      html += "，是个" + names.map(function (n, i) {
+        var cls = (fresh && i === names.length - 1) ? ' class="fresh"' : "";
+        return "<b" + cls + ">" + n + "</b>";
+      }).join("，");
+    }
+    html += "。";
+    bioEl.innerHTML = html;
+
+    if (fresh && names.length) {
+      var li = document.createElement("li");
+      li.className = "chip";
+      li.textContent = names[names.length - 1];
+      listEl.appendChild(li);
+      listEl.scrollTop = listEl.scrollHeight;
+    }
+
+    if (names.length >= HATS.length) {
+      btnHat.textContent = "帽子库存已清空";
+      btnHat.disabled = true;
+    } else {
+      btnHat.textContent = "再扣一顶";
+      btnHat.disabled = false;
+    }
+  }
+
+  /* ---------- 全部摘掉 ---------- */
+  function resetAll() {
+    hatsLayer.innerHTML = "";
+    state.hats.length = 0;
+    listEl.innerHTML = "";
+    updateUI(false);
+    layout();
+    setStampText("扣帽子", -14, 1);
+  }
+
+  function shake() {
+    stage.classList.remove("shake");
+    void stage.offsetWidth;
+    stage.classList.add("shake");
+  }
+
+  /* ---------- 进入 / 返回 ---------- */
+  enterBtn.addEventListener("click", function () {
+    intro.classList.add("out");
+    setTimeout(function () {
+      intro.hidden = true;
+      app.hidden = false;
+      requestAnimationFrame(function () {
+        layout();
+        setStampText("扣帽子", -14, 1);
+        slamStamp();          // 开场印章砸下
+      });
+    }, 430);
+  });
+
+  backBtn.addEventListener("click", function () {
+    resetAll();
+    app.hidden = true;
+    intro.classList.remove("out");
+    intro.hidden = false;
+  });
+
+  /* ---------- 交互 ---------- */
+  stage.addEventListener("click", addHat);
+  btnHat.addEventListener("click", addHat);
+  btnReset.addEventListener("click", resetAll);
+  posRange.addEventListener("input", layout);
+  offRange.addEventListener("input", layout);
+  window.addEventListener("resize", layout);
+
+  document.addEventListener("keydown", function (e) {
+    if (app.hidden) return;
+    if (e.code === "Space" || e.code === "Enter") {
+      e.preventDefault();
+      addHat();
+    }
+  });
+
+  /* ---------- 初始化 ---------- */
+  if (photo.complete && photo.naturalWidth) layout();
+  requestAnimationFrame(layout);
+})();
+</script>
+</body>
+</html>
