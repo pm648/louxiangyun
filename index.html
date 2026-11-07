@@ -303,7 +303,7 @@
 
       <div class="btns">
         <button id="btn-hat">再扣一顶</button>
-        <button id="btn-reset" class="ghost">平反</button>
+        <button id="btn-reset" class="ghost">全部摘掉</button>
         <button id="btn-back" class="ghost">← 回到封面</button>
       </div>
 
@@ -326,132 +326,132 @@
   "use strict";
 
   /* ============================================================
-     帽子库：30 顶
-     rot  = 印章倾斜角度（每顶不同，正负交错）
-     size = 印章字号系数（每顶不同，形成大小变化）
+     帽子库：完全替换为截图里的政治身份（拆分好的）
+     rot  = 印章倾斜角度
+     size = 印章字号系数
      ============================================================ */
   const HATS = [
-    /* 01 */ { name: "特务",     rot: -14, size: 1.00, shape: `
+    /* 01 */ { name: "叛徒",     rot: -14, size: 1.00, shape: `
       <ellipse cx="0" cy="0" rx="92" ry="13" fill="#111"/>
       <path d="M-62,-4 C-66,-58 -40,-66 0,-66 C40,-66 66,-58 62,-4 Z" fill="#232323"/>
       <rect x="-63" y="-28" width="126" height="13" rx="3" fill="#8b1414"/>
     `},
-    /* 02 */ { name: "大军阀",   rot: 11,  size: 1.08, shape: `
+    /* 02 */ { name: "特务",     rot: 11,  size: 1.08, shape: `
       <ellipse cx="0" cy="3" rx="86" ry="12" fill="#191919"/>
       <path d="M-68,0 C-70,-52 -42,-64 0,-64 C42,-64 70,-52 68,0 Z" fill="#63703f"/>
       <path d="M-68,0 L68,0 L64,-15 L-64,-15 Z" fill="#4b5730"/>
       <circle cx="0" cy="-36" r="13" fill="#b71c1c"/>
       <path d="M0,-47 L3.5,-38 L13,-38 L5.5,-32 L8.5,-23 L0,-28.5 L-8.5,-23 L-5.5,-32 L-13,-38 L-3.5,-38 Z" fill="#f2c53d"/>
     `},
-    /* 03 */ { name: "走资派",   rot: -7,  size: 0.92, shape: `
+    /* 03 */ { name: "大军阀",   rot: -7,  size: 0.92, shape: `
       <ellipse cx="0" cy="0" rx="90" ry="12" fill="#0f0f0f"/>
       <rect x="-50" y="-104" width="100" height="104" rx="5" fill="#1c1c1c"/>
       <rect x="-50" y="-30" width="100" height="14" fill="#7a0e0e"/>
       <ellipse cx="0" cy="-104" rx="50" ry="8" fill="#2a2a2a"/>
     `},
-    /* 04 */ { name: "叛徒",     rot: 17,  size: 0.98, shape: `
+    /* 04 */ { name: "反党分子", rot: 17,  size: 0.98, shape: `
       <ellipse cx="0" cy="0" rx="86" ry="12" fill="#12180f"/>
       <path d="M-56,-4 C-56,-62 56,-62 56,-4 Z" fill="#2b3a26"/>
       <rect x="-56" y="-26" width="112" height="12" fill="#1b2418"/>
     `},
-    /* 05 */ { name: "反动派",   rot: -19, size: 1.12, shape: `
+    /* 05 */ { name: "野心家",   rot: -19, size: 1.12, shape: `
       <ellipse cx="0" cy="-14" rx="84" ry="30" fill="#6d1b1b"/>
       <ellipse cx="0" cy="-8" rx="84" ry="14" fill="#4d1212"/>
       <circle cx="0" cy="-44" r="7" fill="#c9a227"/>
     `},
-    /* 06 */ { name: "反动权威", rot: 8,   size: 0.90, shape: `
+    /* 06 */ { name: "走资派",   rot: 8,   size: 0.90, shape: `
       <rect x="-44" y="-46" width="88" height="36" rx="4" fill="#2a2a2a"/>
       <path d="M-98,-54 L0,-80 L98,-54 L0,-28 Z" fill="#141414"/>
       <path d="M0,-78 L0,-104" stroke="#c9a227" stroke-width="3"/>
       <circle cx="0" cy="-106" r="6" fill="#c9a227"/>
     `},
-    /* 07 */ { name: "牛鬼蛇神", rot: -11, size: 1.05, shape: `
+    /* 07 */ { name: "投降派",   rot: -11, size: 1.05, shape: `
       <ellipse cx="0" cy="0" rx="84" ry="12" fill="#3a2a18"/>
       <path d="M-64,-2 L0,-128 L64,-2 Z" fill="#5a4126"/>
       <path d="M-64,-2 L0,-128 L0,-2 Z" fill="#6f5233"/>
       <circle cx="0" cy="-130" r="7" fill="#c9a227"/>
     `},
-    /* 08 */ { name: "工贼",     rot: 21,  size: 0.95, shape: `
+    /* 08 */ { name: "修正主义", rot: 21,  size: 0.95, shape: `
       <path d="M-82,-4 C-82,-76 82,-76 82,-4 Z" fill="#c9a227"/>
       <rect x="-7" y="-80" width="14" height="76" rx="6" fill="#a8861a"/>
       <ellipse cx="0" cy="-4" rx="82" ry="11" fill="#e0b93a"/>
     `},
-    /* 09 */ { name: "野心家",   rot: -16, size: 0.90, shape: `
+    /* 09 */ { name: "大恶霸",   rot: -16, size: 0.90, shape: `
       <ellipse cx="-80" cy="-26" rx="18" ry="6" fill="#141414"/>
       <ellipse cx="80" cy="-26" rx="18" ry="6" fill="#141414"/>
       <ellipse cx="0" cy="0" rx="80" ry="11" fill="#0d0d0d"/>
       <path d="M-58,-2 L-58,-44 Q0,-62 58,-44 L58,-2 Z" fill="#161616"/>
       <rect x="-58" y="-32" width="116" height="12" fill="#c9a227"/>
     `},
-    /* 10 */ { name: "大恶霸",   rot: 6,   size: 1.10, shape: `
+    /* 10 */ { name: "黑线人物", rot: 6,   size: 1.10, shape: `
       <ellipse cx="0" cy="0" rx="99" ry="14" fill="#4a3320"/>
       <path d="M-58,0 C-62,-58 -40,-72 0,-72 C40,-72 62,-58 58,0 Z" fill="#6b4a2f"/>
       <rect x="-58" y="-24" width="116" height="12" fill="#2a1c10"/>
     `},
-    /* 11 */ { name: "卖国贼",   rot: -21, size: 0.96, shape: `
+    /* 11 */ { name: "不革命",   rot: -21, size: 0.96, shape: `
       <ellipse cx="0" cy="0" rx="80" ry="12" fill="#1a1a1a"/>
       <path d="M-72,-2 C-72,-62 72,-62 72,-2 Z" fill="#2f2f2f"/>
       <circle cx="0" cy="-64" r="9" fill="#b71c1c"/>
     `},
-    /* 12 */ { name: "黑帮",     rot: 14,  size: 1.03, shape: `
+    /* 12 */ { name: "黑秀才",   rot: 14,  size: 1.03, shape: `
       <path d="M-80,-4 C-80,-84 80,-84 80,-4 Z" fill="#3f4a24"/>
       <ellipse cx="0" cy="-4" rx="80" ry="11" fill="#4d5a2c"/>
       <rect x="-86" y="-8" width="172" height="11" rx="5" fill="#2f3819"/>
     `},
-    /* 13 */ { name: "汉奸",     rot: -9,  size: 1.08, shape: `
+    /* 13 */ { name: "黑手",     rot: -9,  size: 1.08, shape: `
       <ellipse cx="0" cy="0" rx="96" ry="12" fill="#7a6a3a"/>
       <path d="M-64,0 C-70,-46 -40,-56 0,-56 C40,-56 70,-46 64,0 Z" fill="#8f7d46"/>
       <path d="M-64,0 L64,0 L60,-12 L-60,-12 Z" fill="#6d5c2f"/>
     `},
-    /* 14 */ { name: "保皇派",   rot: 19,  size: 0.94, shape: `
+    /* 14 */ { name: "黑帮凶",   rot: 19,  size: 0.94, shape: `
       <ellipse cx="0" cy="0" rx="80" ry="11" fill="#111"/>
       <path d="M-70,-2 C-70,-58 70,-58 70,-2 Z" fill="#262626"/>
       <circle cx="0" cy="-60" r="11" fill="#c9a227"/>
       <path d="M0,-71 L0,-88" stroke="#c9a227" stroke-width="4"/>
       <circle cx="0" cy="-92" r="6" fill="#b71c1c"/>
     `},
-    /* 15 */ { name: "投机分子", rot: -17, size: 0.92, shape: `
+    /* 15 */ { name: "经验主义", rot: -17, size: 0.92, shape: `
       <ellipse cx="0" cy="0" rx="84" ry="12" fill="#20242b"/>
       <path d="M-52,-2 L-20,-96 L20,-96 L52,-2 Z" fill="#333a44"/>
       <rect x="-24" y="-104" width="48" height="12" rx="4" fill="#4a5563"/>
     `},
-    /* 16 */ { name: "阶级敌人", rot: 10,  size: 1.02, shape: `
+    /* 16 */ { name: "民主派",   rot: 10,  size: 1.02, shape: `
       <ellipse cx="0" cy="2" rx="88" ry="12" fill="#1a1a1a"/>
       <path d="M-64,0 C-66,-48 -40,-58 0,-58 C40,-58 66,-48 64,0 Z" fill="#4a4f38"/>
       <path d="M-64,0 L64,0 L60,-12 L-60,-12 Z" fill="#3a3f2c"/>
       <circle cx="0" cy="-32" r="10" fill="#b71c1c"/>
     `},
-    /* 17 */ { name: "变色龙",   rot: -13, size: 1.10, shape: `
+    /* 17 */ { name: "中庸之道", rot: -13, size: 1.10, shape: `
       <ellipse cx="0" cy="0" rx="84" ry="12" fill="#222"/>
       <path d="M-60,-2 L-60,-52 Q0,-70 60,-52 L60,-2 Z" fill="#2e8b57"/>
       <path d="M-60,-2 L0,-70 L60,-2 Z" fill="#c0392b" opacity=".78"/>
     `},
-    /* 18 */ { name: "复辟狂",   rot: 16,  size: 0.90, shape: `
+    /* 18 */ { name: "变色龙",   rot: 16,  size: 0.90, shape: `
       <ellipse cx="0" cy="0" rx="86" ry="12" fill="#0f0f0f"/>
       <path d="M-56,-4 C-56,-62 56,-62 56,-4 Z" fill="#2b2b2b"/>
       <rect x="-56" y="-26" width="112" height="12" fill="#a8861a"/>
     `},
-    /* 19 */ { name: "走狗",     rot: -20, size: 1.16, shape: `
+    /* 19 */ { name: "粗腿抱得紧", rot: -20, size: 1.16, shape: `
       <ellipse cx="0" cy="0" rx="82" ry="12" fill="#1a1a1a"/>
       <path d="M-56,-2 L-56,-46 Q0,-60 56,-46 L56,-2 Z" fill="#333"/>
       <path d="M-46,-46 L-58,-86 L-24,-56 Z" fill="#3d3d3d"/>
       <path d="M46,-46 L58,-86 L24,-56 Z" fill="#3d3d3d"/>
     `},
-    /* 20 */ { name: "两面派",   rot: 7,   size: 0.95, shape: `
+    /* 20 */ { name: "报告打得勤", rot: 7,   size: 0.95, shape: `
       <ellipse cx="0" cy="0" rx="84" ry="12" fill="#151515"/>
       <path d="M-58,-2 L-58,-50 Q0,-66 58,-50 L58,-2 Z" fill="#2b3a26"/>
       <path d="M0,-2 L0,-60 L58,-50 L58,-2 Z" fill="#5a1c1c"/>
     `},
-    /* 21 */ { name: "老右派",   rot: -6,  size: 1.00, shape: `
+    /* 21 */ { name: "谎话说得多", rot: -6,  size: 1.00, shape: `
       <ellipse cx="0" cy="-16" rx="86" ry="28" fill="#4f3b1f" transform="rotate(-8)"/>
       <ellipse cx="0" cy="-8" rx="80" ry="13" fill="#3a2a14"/>
     `},
-    /* 22 */ { name: "黑后台",   rot: 13,  size: 1.06, shape: `
+    /* 22 */ { name: "马屁拍得响", rot: 13,  size: 1.06, shape: `
       <ellipse cx="0" cy="0" rx="100" ry="13" fill="#0d0d0d"/>
       <path d="M-62,0 C-66,-56 -42,-68 0,-68 C42,-68 66,-56 62,0 Z" fill="#1f1f1f"/>
       <rect x="-62" y="-24" width="124" height="11" fill="#3d3d3d"/>
     `},
-    /* 23 */ { name: "教条主义", rot: -5,  size: 1.02, shape: `
+    /* 23 */ { name: "绊脚石",   rot: -5,  size: 1.02, shape: `
       <ellipse cx="0" cy="0" rx="96" ry="13" fill="#2b1d10"/>
       <rect x="-76" y="-32" width="152" height="32" rx="4" fill="#8b6b3e"/>
       <rect x="-72" y="-60" width="144" height="28" rx="4" fill="#a17e4a"/>
@@ -460,14 +460,14 @@
       <path d="M-76,-32 L76,-32" stroke="#d9bc85" stroke-width="2"/>
       <path d="M-72,-60 L72,-60" stroke="#d9bc85" stroke-width="2"/>
     `},
-    /* 24 */ { name: "经验主义", rot: 18,  size: 0.92, shape: `
+    /* 24 */ { name: "墙头草",   rot: 18,  size: 0.92, shape: `
       <ellipse cx="0" cy="0" rx="94" ry="12" fill="#3a2a1a"/>
       <path d="M-64,-4 C-66,-54 -38,-66 0,-66 C38,-66 66,-54 64,-4 Z" fill="#6b5030"/>
       <path d="M-64,-14 C-30,-20 30,-20 64,-14 L64,-4 L-64,-4 Z" fill="#543d24"/>
       <path d="M-64,-4 L-98,4 L-96,14 L-58,4 Z" fill="#3a2a1a"/>
       <circle cx="0" cy="-68" r="6" fill="#8a6b44"/>
     `},
-    /* 25 */ { name: "形式主义", rot: -18, size: 1.05, shape: `
+    /* 25 */ { name: "老好人",   rot: -18, size: 1.05, shape: `
       <ellipse cx="0" cy="0" rx="88" ry="12" fill="#1a1a1a"/>
       <path d="M-54,-2 L-40,-96 L40,-96 L54,-2 Z" fill="#2c2c2c"/>
       <rect x="-56" y="-28" width="112" height="10" fill="#c9a227"/>
@@ -475,7 +475,7 @@
       <path d="M0,-110 L0,-126" stroke="#c9a227" stroke-width="4"/>
       <circle cx="0" cy="-130" r="5" fill="#f2c53d"/>
     `},
-    /* 26 */ { name: "官僚主义", rot: 9,   size: 0.96, shape: `
+    /* 26 */ { name: "小修苗",   rot: 9,   size: 0.96, shape: `
       <ellipse cx="0" cy="0" rx="88" ry="12" fill="#141414"/>
       <path d="M-62,-2 C-64,-52 -40,-62 0,-62 C40,-62 64,-52 62,-2 Z" fill="#2a2a2a"/>
       <rect x="-62" y="-28" width="124" height="12" fill="#7a0e0e"/>
@@ -484,7 +484,7 @@
       <ellipse cx="-92" cy="-30" rx="24" ry="7" fill="#1a1a1a"/>
       <ellipse cx="92" cy="-30" rx="24" ry="7" fill="#1a1a1a"/>
     `},
-    /* 27 */ { name: "宗派主义", rot: -22, size: 1.00, shape: `
+    /* 27 */ { name: "造谣公司", rot: -22, size: 1.00, shape: `
       <ellipse cx="0" cy="0" rx="100" ry="13" fill="#1a1a1a"/>
       <path d="M-54,-2 L0,-96 L54,-2 Z" fill="#4a3f2a"/>
       <path d="M-54,-2 L0,-96 L0,-2 Z" fill="#5c4e34"/>
@@ -492,14 +492,14 @@
       <path d="M-92,-4 L-54,-2" stroke="#3a3122" stroke-width="5" stroke-linecap="round"/>
       <path d="M92,-4 L54,-2" stroke="#3a3122" stroke-width="5" stroke-linecap="round"/>
     `},
-    /* 28 */ { name: "自由主义", rot: 4,   size: 1.12, shape: `
+    /* 28 */ { name: "传话筒",   rot: 4,   size: 1.12, shape: `
       <ellipse cx="0" cy="0" rx="86" ry="12" fill="#3a3a3a"/>
       <path d="M-58,-2 C-72,-42 -50,-58 0,-54 C50,-58 72,-42 58,-2 Z" fill="#6b6b6b"/>
       <path d="M-40,-30 C-24,-46 24,-46 40,-30 C24,-38 -24,-38 -40,-30 Z" fill="#8a8a8a"/>
       <circle cx="0" cy="-56" r="9" fill="#7d7d7d"/>
       <path d="M-58,-2 L58,-2" stroke="#4d4d4d" stroke-width="4"/>
     `},
-    /* 29 */ { name: "主观主义", rot: 20,  size: 0.94, shape: `
+    /* 29 */ { name: "逆流邪风", rot: 20,  size: 0.94, shape: `
       <ellipse cx="0" cy="0" rx="90" ry="12" fill="#2b1d10"/>
       <path d="M-74,-2 C-74,-60 74,-60 74,-2 Z" fill="#8b3a3a"/>
       <ellipse cx="0" cy="-36" rx="74" ry="20" fill="#a84a4a" opacity=".55"/>
@@ -507,7 +507,7 @@
       <circle cx="-26" cy="-30" r="5" fill="#f7e3a4" opacity=".6"/>
       <circle cx="22" cy="-42" r="4" fill="#f7e3a4" opacity=".6"/>
     `},
-    /* 30 */ { name: "机会主义", rot: -12, size: 1.02, shape: `
+    /* 30 */ { name: "小爬虫",   rot: -12, size: 1.02, shape: `
       <ellipse cx="0" cy="0" rx="96" ry="13" fill="#2a1c10"/>
       <path d="M-56,-2 C-58,-56 -30,-68 0,-68 C30,-68 58,-56 56,-2 Z" fill="#7a5a3a"/>
       <path d="M-56,-2 L56,-2 L50,-16 L-50,-16 Z" fill="#5a3f28"/>
